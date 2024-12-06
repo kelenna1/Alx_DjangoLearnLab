@@ -9,6 +9,7 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f9f9f9;
     color: #333;
+    
 }
 
 header {
@@ -42,4 +43,44 @@ footer {
     padding: 10px;
     background-color: #333;
     color: white;
+}
+
+.registry form {
+    width: 50%; /* Adjust the form width */
+    max-width: 400px; /* Ensure it's not too wide */
+    margin: 20px auto; /* Center the form horizontally */
+    padding: 20px 30px; /* Add spacing */
+    font-family: Arial, sans-serif; /* Clean font */
+    height: 100vh;
+}
+
+.registry form .form-control {
+    width: 100%; /* Full-width inputs */
+    padding: 10px 15px; /* Comfortable padding */
+    margin-bottom: 15px; /* Spacing between inputs */
+    font-size: 16px; /* Readable font size */
+    border: none; /* Remove borders */
+    border-bottom: 2px solid #ccc; /* Subtle underline */
+    outline: none; /* Remove focus outline */
+    background-color: transparent; /* Transparent background */
+}
+
+.registry form .form-control:focus {
+    border-bottom: 2px solid #007bff; /* Highlight underline on focus */
+}
+
+.registry form button {
+    background-color: #06a330; /* Button color */
+    color: white; /* White text */
+    padding: 10px 15px; /* Comfortable button size */
+    font-size: 16px; /* Bold, readable text */
+    cursor: pointer; /* Pointer cursor */
+    font-weight: bold;
+    border: none; /* Remove borders */
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+    margin-top: 50px;
+}
+
+.registry form button:hover {
+    background-color: #05590c; /* Darker color on hover */
 }
