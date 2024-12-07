@@ -10,21 +10,19 @@
 <body>
     <header>
         <nav>
-            <ul>
-                
-                {% if user.is_authenticated %}
-                    <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'posts' %}">Blog Posts</a></li>
-                     <li><a href="{% url 'post_create' %}">New Post</a></li>
-                    <li><a href="{% url 'logout' %}">Logout</a></li>
-                {% else %}
-                    <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'posts' %}">Blog Posts</a></li>
-                    <li><a href="{% url 'login' %}">Login</a></li>
-                    <li><a href="{% url 'register' %}">Register</a></li>
-                {% endif %}
-            </ul>
-        </nav>
+    <ul>
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'posts' %}">Blog Posts</a></li> <!-- ListView -->
+        {% if user.is_authenticated %}
+            <li><a href="{% url 'post_create' %}">Create New Post</a></li> <!-- CreateView -->
+            <li><a href="{% url 'logout' %}">Logout</a></li>
+        {% else %}
+            <li><a href="{% url 'login' %}">Login</a></li>
+            <li><a href="{% url 'register' %}">Register</a></li>
+        {% endif %}
+    </ul>
+</nav>
+
     </header>
 
     <div class="content">
