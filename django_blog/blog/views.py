@@ -51,6 +51,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from .models import Post  # Import the Post model
 from django.db.models import Q
+from taggit.models import Tag
 
 # ListView to display all blog posts
 class PostListView(ListView):
@@ -109,14 +110,21 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         post = self.get_object()
         return self.request.user == post.author  # Only author can delete
     
-class PostsByTagView(ListView):
+class PostByTagListView(ListView):
     model = Post
-    template_name = "blog/posts_by_tag.html"
+    template_name = "blog/posts_by_tag.html"  # Template to display posts by tag
     context_object_name = "posts"
 
     def get_queryset(self):
-        tag_name = self.kwargs.get("tag")
-        return Post.objects.filter(tags__name=tag_name)
+        # Filter posts by the tag passed in the URL
+        tag_slug = self.kwargs.get("tag_slug")
+        self.tag = get_object_or_404(Tag, slug=tag_slug)
+        return Post.objects.filter(tags__slug=tag_slug).distinct()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tag"] = self.tag  # Pass the tag to the template
+        return context
 
 #new line
 # from django.shortcuts import render, get_object_or_404, redirect
