@@ -105,20 +105,18 @@ from .models import Post, Comment
 from .forms import CommentForm
 
 @login_required
-def add_comment(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-    if request.method == "POST":
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.post = post
-            comment.author = request.user
-            comment.save()
-            return redirect("post_detail", pk=post.id)
-    else:
-        form = CommentForm()
-    return render(request, "blog/add_comment.html", {"form": form, "post": post})
+class CommentCreateView(LoginRequiredMixin, CreateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = "blog/add_comment.html"
 
+    def form_valid(self, form):
+        form.instance.author = self.request.user  # Set the logged-in user as the author
+        form.instance.post = Post.objects.get(id=self.kwargs['post_id'])  # Link to the appropriate post
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("post_detail", kwargs={"pk": self.kwargs["post_id"]})
 
 class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Comment
