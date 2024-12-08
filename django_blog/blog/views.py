@@ -104,7 +104,6 @@ from django.urls import reverse
 from .models import Post, Comment
 from .forms import CommentForm
 
-@login_required
 class CommentCreateView(LoginRequiredMixin, CreateView):
     model = Comment
     form_class = CommentForm
@@ -117,6 +116,7 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse_lazy("post_detail", kwargs={"pk": self.kwargs["post_id"]})
+    
 
 class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Comment
