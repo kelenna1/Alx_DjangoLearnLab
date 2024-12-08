@@ -93,3 +93,58 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author  # Only author can delete
+    
+
+#new line
+# from django.shortcuts import render, get_object_or_404, redirect
+# from django.contrib.auth.decorators import login_required
+# from django.views.generic.edit import UpdateView, DeleteView
+from django.urls import reverse
+# from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from .models import Post, Comment
+from .forms import CommentForm
+
+@login_required
+def add_comment(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.author = request.user
+            comment.save()
+            return redirect("post_detail", pk=post.id)
+    else:
+        form = CommentForm()
+    return render(request, "blog/add_comment.html", {"form": form, "post": post})
+
+
+class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = "blog/edit_comment.html"
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.author
+
+    def get_success_url(self):
+        return reverse("post_detail", kwargs={"pk": self.object.post.id})
+
+
+class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Comment
+    template_name = "blog/delete_comment.html"
+
+    def test_func(self):
+        comment = self.get_object()
+        return self.request.user == comment.author
+
+    def get_success_url(self):
+        return reverse("post_detail", kwargs={"pk": self.object.post.id})
+

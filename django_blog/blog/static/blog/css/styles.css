@@ -84,3 +84,39 @@ footer {
 .registry form button:hover {
     background-color: #05590c; /* Darker color on hover */
 }
+
+/* Center the container div */
+.container {
+    max-width: 800px; /* Set a max width for the container */
+    margin: 0 auto; /* Center the container horizontally */
+    padding: 20px;
+    box-sizing: border-box;
+    height: 100vh;
+}
+
+/* Style the post divs */
+.post {
+    margin-bottom: 30px; /* Add space between posts */
+    padding: 10px;
+    border-bottom: 1px solid #ddd; /* Optional, for visual separation */
+}
+
+.post h1, .post h2 {
+    margin: 10px 0;
+    font-family: Arial, sans-serif;
+}
+
+.post p, .post ul {
+    font-size: 16px;
+    line-height: 1.5;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* General body styling
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9; /* Light background 
+    color: #333; 
+} */

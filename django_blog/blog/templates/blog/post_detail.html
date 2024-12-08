@@ -1,13 +1,44 @@
 {% extends "blog/base.html" %}
 {% block title %}{{ post.title }}{% endblock %}
 {% block content %}
-<h1>{{ post.title }}</h1>
-<p>{{ post.content }}</p>
-<p>By {{ post.author }} on {{ post.created_at }}</p>
+<div class="container">
+    <div class=" post">
+        <h1>{{ post.title }}</h1>
+        <p>{{ post.content }}</p>
+        <p>By {{ post.author }} on {{ post.created_at }}</p>
 
-{% if user == post.author %}
-    <a href="{% url 'post_edit' post.pk %}">Edit</a> |
-    <a href="{% url 'post_delete' post.pk %}">Delete</a>
-{% endif %}
-<a href="{% url 'posts' %}">Back to All Posts</a>
+        {% if user == post.author %}
+            <a href="{% url 'post_update' post.pk %}">Edit</a> |
+            <a href="{% url 'post_delete' post.pk %}">Delete</a>
+        {% endif %}
+        <a href="{% url 'posts' %}">Back to All Posts</a>
+    </div>
+    <div class=" post">
+        <h2>Comments</h2>
+            <ul>
+                {% for comment in post.comments.all %}
+                <li>
+                    <strong>{{ comment.author }}</strong>: {{ comment.content }}
+                    {% if comment.author == user %}
+                    <a href="{% url 'comment_edit' comment.id %}">Edit</a>
+                    <a href="{% url 'comment_delete' comment.id %}">Delete</a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+            </ul>
+
+        {% if user.is_authenticated %}
+        <h3>Add a Comment</h3>
+            <form method="POST" action="{% url 'add_comment' post.id %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn">Post Comment</button>
+            </form>
+        {% else %}
+            <p><a href="{% url 'login' %}">Log in</a> to leave a comment.</p>
+        {% endif %}
+
+    </div>
+    
+</div>
 {% endblock %}
