@@ -172,3 +172,9 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def get_success_url(self):
         return reverse("post_detail", kwargs={"pk": self.object.post.id})
 
+from .forms import PostForm
+
+def test_view(request):
+    form = PostForm()
+    print(form)
+    return render(request, "test.html", {"form": form})
