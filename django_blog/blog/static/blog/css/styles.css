@@ -39,10 +39,12 @@ header nav ul li a {
 
 footer {
     text-align: center;
-    margin-top: 50px;
     padding: 10px;
     background-color: #333;
     color: white;
+    left: 0;
+    bottom: 0;
+    width: 100%;
 }
 
 .registry form {
@@ -91,7 +93,7 @@ footer {
     margin: 0 auto; /* Center the container horizontally */
     padding: 20px;
     box-sizing: border-box;
-    height: 100vh;
+    height: 100%;
 }
 
 /* Style the post divs */
@@ -120,3 +122,52 @@ body {
     background-color: #f4f4f9; /* Light background 
     color: #333; 
 } */
+.btn{
+    background-color: #06a330; /* Button color */
+    color: white; /* White text */
+    padding: 10px 15px; /* Comfortable button size */
+    font-size: 16px; /* Bold, readable text */
+    cursor: pointer; /* Pointer cursor */
+    font-weight: bold;
+    border: none; /* Remove borders */
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+    margin-top: 50px;
+}
+
+.btn:hover{
+    background-color: #05590c;
+}
+
+.type{
+    text-decoration: none;
+    color: aliceblue;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+a{
+    text-decoration: none;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 18px;
+    color: brown;
+}
+.btn_1{
+    background-color: #58afe9; /* Button color */
+    color: white; /* White text */
+    padding: 10px 15px; /* Comfortable button size */
+    font-size: 16px; /* Bold, readable text */
+    cursor: pointer; /* Pointer cursor */
+    font-weight: bold;
+    border: none; /* Remove borders */
+    border-radius: 10px;
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+    margin-top: 10px;
+}
+
+.moon{
+    width: 200px;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 15px;
+    font-size: 16px;
+}

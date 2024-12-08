@@ -12,6 +12,9 @@ def home(response):
     # return render(request, "blog/home.html", context)
     return render (response, "blog/home.html", context)
 
+def logout(response):   
+    return render (response, "blog/logout.html", {})
+
 def login(response):
     return render(response, "blog/login.html", {})
 
@@ -47,6 +50,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from .models import Post  # Import the Post model
+from django.db.models import Q
 
 # ListView to display all blog posts
 class PostListView(ListView):
@@ -54,6 +58,17 @@ class PostListView(ListView):
     template_name = "blog/post_list.html"  # Template for listing posts
     context_object_name = "posts"
     ordering = ["-published_date"]  # Display newest posts first
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        query = self.request.GET.get("search")
+        if query:
+            queryset = queryset.filter(
+                Q(title__icontains=query) |
+                Q(content__icontains=query) |
+                Q(tags__name__icontains=query)  # Search by tags
+            ).distinct()
+        return queryset
 
 # DetailView to show individual blog posts
 class PostDetailView(DetailView):
@@ -94,6 +109,14 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         post = self.get_object()
         return self.request.user == post.author  # Only author can delete
     
+class PostsByTagView(ListView):
+    model = Post
+    template_name = "blog/posts_by_tag.html"
+    context_object_name = "posts"
+
+    def get_queryset(self):
+        tag_name = self.kwargs.get("tag")
+        return Post.objects.filter(tags__name=tag_name)
 
 #new line
 # from django.shortcuts import render, get_object_or_404, redirect
@@ -110,9 +133,12 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
     template_name = "blog/add_comment.html"
 
     def form_valid(self, form):
-        form.instance.author = self.request.user  # Set the logged-in user as the author
-        form.instance.post = Post.objects.get(id=self.kwargs['post_id'])  # Link to the appropriate post
+    # Get the `Post` object based on the `pk` from the URL
+        post_id = self.kwargs['pk']
+        form.instance.post = get_object_or_404(Post, pk=post_id)  # Use `post`, not `post_id`
+        form.instance.author = self.request.user  # Assign the logged-in user as the comment author
         return super().form_valid(form)
+
 
     def get_success_url(self):
         return reverse_lazy("post_detail", kwargs={"pk": self.kwargs["post_id"]})
