@@ -1,10 +1,10 @@
+from taggit.forms import TagWidget as TagWidgetImported 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django import forms
 from .models import Post
 from .models import Comment
-from taggit.forms import TagWidget
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -20,7 +20,7 @@ class PostForm(forms.ModelForm):
         widgets = {
             "title": forms.TextInput(attrs={"class": "form-control"}),
             "content": forms.Textarea(attrs={"class": "form-control"}),
-            "tags": TagWidget(attrs={"placeholder": "Add tags, separated by commas"}),
+            "tags": TagWidgetImported(attrs={"placeholder": "Add tags, separated by commas"}),
         }
 
 class CommentForm(forms.ModelForm):
