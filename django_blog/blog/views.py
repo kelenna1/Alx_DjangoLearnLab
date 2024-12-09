@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import RegisterForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import login, authenticate
 
 # Create your views here.
 def home(response):
@@ -15,8 +17,25 @@ def home(response):
 def logout(response):   
     return render (response, "blog/logout.html", {})
 
-def login(response):
-    return render(response, "blog/login.html", {})
+def login_view(request):
+    if request.method == "POST":
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, "Logged in successfully!")
+                return redirect("home")
+            else:
+                messages.error(request, "Invalid username or password.")
+        else:
+            messages.error(request, "Invalid credentials, please try again.")
+    else:
+        form = AuthenticationForm()
+
+    return render(request, "blog/login.html", {"form": form})
 
 def posts(response):
     return render(response, "blog/posts.html", {})

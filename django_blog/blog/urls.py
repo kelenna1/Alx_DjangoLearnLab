@@ -13,11 +13,23 @@ from .views import (
     PostByTagListView,
 )
 
+from django.contrib.auth.views import LogoutView
+from django.views.generic.base import RedirectView
+from django.urls import path
+from django.shortcuts import redirect
+
+class CustomLogoutView(LogoutView):
+    def dispatch(self, request, *args, **kwargs):
+        if request.method == 'GET':
+            return self.post(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
+
 urlpatterns = [
+    path("", lambda request: redirect("home", permanent=True)),
     path('home', views.home, name="home"),
     path("login/", LoginView.as_view(template_name="blog/login.html"), name="login"),
     path("register/", views.register, name="register"),
-    path('logout/', LogoutView.as_view(template_name="blog/logout.html"), name='logout'),
+    #path('logout/', LogoutView.as_view(next_page='home'), name='logout'),
     path('profile/', views.profile, name='profile'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path("posts/", PostListView.as_view(), name="posts"),  # Keep "posts" for your list template
@@ -30,6 +42,8 @@ urlpatterns = [
     path("comment/<int:pk>/delete/", CommentDeleteView.as_view(), name="comment_delete"),
     path("search/", PostListView.as_view(), name="posts"),  # Already defined
     path("tags/<slug:tag_slug>/", PostByTagListView.as_view(), name="posts_by_tag"),
-
+    path('logout/', CustomLogoutView.as_view(next_page='home'), name='logout'),
 ]
+
+
 
