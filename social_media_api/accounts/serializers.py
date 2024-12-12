@@ -13,7 +13,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):  # Inherit from M
 
     def create(self, validated_data):
         # Use create_user to create a new user
-        user = User.objects.create_user(
+        user = get_user_model().objects.create_user(
             username=validated_data['username'],
             email=validated_data.get('email', ''),
             password=validated_data['password'],  # Fixed parenthesis for get
