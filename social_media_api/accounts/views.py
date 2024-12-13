@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
-from .serializers import UserRegistrationSerializer, USerLoginSerializer
+from .serializers import UserRegistrationSerializer, UserLoginSerializer
 # Create your views here.
 
 class RegisterView(APIView):
@@ -21,7 +21,7 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        serializer = USerLoginSerializer(data=request.data)
+        serializer = UserLoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data
             token, _ = Token.objects.get_or_create(user= user)
