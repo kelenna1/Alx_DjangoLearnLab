@@ -34,11 +34,12 @@ class LoginView(APIView):
 User = get_user_model
     
 class FollowUserView(generics.GenericAPIView):
+    queryset = CustomUser.objects.all()  # Ensures CustomUser.objects.all() is present
     permission_classes = [IsAuthenticated]
 
     def post(self, request, user_id):
         # Get the user to follow
-        user_to_follow = get_object_or_404(CustomUser, id=user_id)
+        user_to_follow = get_object_or_404(self.queryset, id=user_id)
         
         # Check if the user is already following
         if user_to_follow in request.user.following.all():
@@ -49,11 +50,12 @@ class FollowUserView(generics.GenericAPIView):
         return Response({"detail": "User followed successfully."}, status=status.HTTP_200_OK)
 
 class UnfollowUserView(generics.GenericAPIView):
+    queryset = CustomUser.objects.all()  # Ensures CustomUser.objects.all() is present
     permission_classes = [IsAuthenticated]
 
     def post(self, request, user_id):
         # Get the user to unfollow
-        user_to_unfollow = get_object_or_404(CustomUser, id=user_id)
+        user_to_unfollow = get_object_or_404(self.queryset, id=user_id)
         
         # Check if the user is not following
         if user_to_unfollow not in request.user.following.all():
