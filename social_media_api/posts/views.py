@@ -1,80 +1,72 @@
-from django.shortcuts import render, get_object_or_404
-from rest_framework import viewsets, permissions, filters,status, generics
-from .models import Post, Comment,Like
+from django.shortcuts import render
+from rest_framework import viewsets, permissions, generics, status
+from rest_framework.exceptions import PermissionDenied
+from .models import Post, Comment
 from .serializers import PostSerializer, CommentSerializer
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from.models import Post, Like
 from notifications.models import Notification
+from rest_framework.permissions import IsAuthenticated
+
+
 # Create your views here.
-class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all().order_by('created_at')
-    serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['title', 'content']
-
-    def perform_create(self, serializer):
-        serializer.save(author = self.request.user)
-
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all().order_by('created_at')
-    serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
-    def perform_create(self, serializer):
-        serializer.save(author = self.request.user)
-
-
-class FeedView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        following_users = request.user.following.all()
-        posts = Post.objects.filter(author__in=following_users).order_by('-created_at')
-        serializer = PostSerializer(posts, many=True)
-        return Response(serializer.data)
+'''class IsAuthorOrReadonly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.author == request.user'''
     
-
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, '''IsAuthorOrReadonly''']
+    
+    def perform_create(self, serializer):
+        print("Validated data:", serializer.validated_data)
+        print("Request user:", self.request.user)
+        serializer.save(author=self.request.user)
+        
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticated, '''IsAuthorOrReadonly''']
+    
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+        
+class FeedView(generics.ListAPIView):
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        following_users = user.following.all()
+        return Post.objects.filter(author__in=following_users).order_by('-created_at')
+    
 class LikePostView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, pk, *args, **kwargs):
-        # Retrieve the post using get_object_or_404
-        post = get_object_or_404(Post, pk=pk)
-
-        # Check if the user has already liked the post
-        if Like.objects.filter(post=post, user=request.user).exists():
-            return Response({"detail": "You have already liked this post."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Create the like
-        Like.objects.create(post=post, user=request.user)
-
-        # Create a notification for the post author
-        if post.author != request.user:
-            Notification.objects.create(
-                recipient=post.author,
-                actor=request.user,
-                verb="liked",
-                target=post
-            )
-
-        return Response({"detail": "Post liked successfully!"}, status=status.HTTP_201_CREATED)
-
-
+    permission_classes =[permissions.IsAuthenticated]
+    
+    def post(self, request, pk):
+        post = generics.get_object_or_404(Post, pk=pk)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        
+        if not created:
+            return Response({'error': 'You have already liked this post'}, status=status.HTTP_400_BAD_REQUEST) #when a user tries to like a post more than once
+    #Creating a Notification
+        Notification.objects.create(recipient = post.author, actor = request.user, verb='Liked your post',target=post)
+        return Response({'success': f'You liked the post "{post.title}"'}, status=status.HTTP_200_OK)
+    
 class UnlikePostView(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, pk, *args, **kwargs):
-        # Retrieve the post using get_object_or_404
-        post = get_object_or_404(Post, pk=pk)
-
-        # Check if the like exists
-        like = Like.objects.filter(post=post, user=request.user).first()
-        if not like:
-            return Response({"detail": "You have not liked this post."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Delete the like
-        like.delete()
-
-        return Response({"detail": "Post unliked successfully!"}, status=status.HTTP_200_OK)
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request, pk):
+        try:
+            post = Post.objects.get(pk=pk)
+        except Post.DoesNotExist:
+            return Response({'error': 'Post not found'}, status=status.HTTP_404_NOT_FOUND)
+        try:
+            like = Like.objects.get(post=post, user=request.user)
+            like.delete()
+        except Like.DoesNotExist:
+            return Response({'error': 'You have not liked this post.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'success': 'You have unliked the post "{post.title}"'}, status=status.HTTP_200_OK)
