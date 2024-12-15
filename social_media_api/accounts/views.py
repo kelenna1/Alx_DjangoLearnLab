@@ -32,35 +32,30 @@ class LoginView(APIView):
         return Response(serializer.errors, status=400)
     
 User = get_user_model
-    
+
 class FollowUserView(generics.GenericAPIView):
     queryset = CustomUser.objects.all()  # Ensures CustomUser.objects.all() is present
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # Explicitly include permissions.IsAuthenticated
 
     def post(self, request, user_id):
-        # Get the user to follow
         user_to_follow = get_object_or_404(self.queryset, id=user_id)
-        
-        # Check if the user is already following
+
         if user_to_follow in request.user.following.all():
             return Response({"detail": "You are already following this user."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Add the user to the following list
+
         request.user.following.add(user_to_follow)
         return Response({"detail": "User followed successfully."}, status=status.HTTP_200_OK)
 
+
 class UnfollowUserView(generics.GenericAPIView):
     queryset = CustomUser.objects.all()  # Ensures CustomUser.objects.all() is present
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # Explicitly include permissions.IsAuthenticated
 
     def post(self, request, user_id):
-        # Get the user to unfollow
         user_to_unfollow = get_object_or_404(self.queryset, id=user_id)
-        
-        # Check if the user is not following
+
         if user_to_unfollow not in request.user.following.all():
             return Response({"detail": "You are not following this user."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Remove the user from the following list
+
         request.user.following.remove(user_to_unfollow)
         return Response({"detail": "User unfollowed successfully."}, status=status.HTTP_200_OK)
